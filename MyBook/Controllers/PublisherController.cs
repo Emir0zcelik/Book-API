@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MyBook.Data.Services;
 using MyBook.Data.ViewModels;
+using System;
 
 namespace MyBook.Controllers
 {
@@ -19,17 +20,26 @@ namespace MyBook.Controllers
         [HttpPost("add-publisher")]
         public IActionResult AddPublisher([FromBody] PublisherVM publisher)
         {
-            _publishersServices.AddPublisher(publisher);
+            var _newPublisher = _publishersServices.AddPublisher(publisher);
 
-            return Ok();
+            return Created(nameof(AddPublisher), _newPublisher);
         }
 
         [HttpGet("get-all-publisher")]
-        public IActionResult GetAllPublisher()
+        public IActionResult GetAllPublisher(string sortBy, string searchString)
         {
-            var _allPublisher = _publishersServices.GetAllPublishers();
+            try
+            {
+                var _allPublisher = _publishersServices.GetAllPublishers(sortBy, searchString);
 
-            return Ok(_allPublisher);
+                return Ok(_allPublisher);
+            }
+            catch (Exception)
+            {
+
+                return BadRequest("Sorry, we could not load the publishers");
+            }
+
         }
 
         [HttpGet("get-publisher-by-id/{id}")]
@@ -37,7 +47,14 @@ namespace MyBook.Controllers
         {
             var _publisher = _publishersServices.GetPublisherById(id);
 
-            return Ok(_publisher);
+            if (_publisher != null)
+            {
+                return Ok(_publisher);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         [HttpPut("update-publisher-by-id/{id}")]
@@ -59,9 +76,20 @@ namespace MyBook.Controllers
         [HttpGet("get-publisher-books-with-authors/{id}")]
         public IActionResult GetPublisherBooksWithAuthors(int id)
         {
-            var _publisherData = _publishersServices.GetPublisherData(id);
+            try
+            {
+                int x1 = 1;
+                int x2 = 0;
+                int result = x1 / x2;
 
-            return Ok(_publisherData);
+                var _publisherData = _publishersServices.GetPublisherData(id);
+
+                return Ok(_publisherData);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

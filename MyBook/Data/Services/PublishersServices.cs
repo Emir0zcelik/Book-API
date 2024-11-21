@@ -15,7 +15,7 @@ namespace MyBook.Data.Services
             _context = context;
         }
 
-        public void AddPublisher(PublisherVM publisher)
+        public Publisher AddPublisher(PublisherVM publisher)
         {
             var _publisher = new Publisher()
             {
@@ -24,9 +24,38 @@ namespace MyBook.Data.Services
 
             _context.Publishers.Add(_publisher);
             _context.SaveChanges();
+
+            return _publisher;
         }
 
-        public List<Publisher> GetAllPublishers() => _context.Publishers.ToList();
+
+        public List<Publisher> GetAllPublishers(string sortBy, string searchString)
+        {
+            var _allPublishers = _context.Publishers.OrderBy(n => n.Name).ToList();
+
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                switch (sortBy)
+                {
+                    case "name_descending":
+                        _allPublishers = _allPublishers.OrderByDescending(n => n.Name).ToList();
+                    break;
+
+                    default:
+                    
+                    break;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                _allPublishers = _allPublishers
+                    .Where(n => n.Name.Contains(searchString, StringComparison.CurrentCultureIgnoreCase))
+                    .ToList();
+            }
+
+            return _allPublishers;  
+        }
 
         public Publisher GetPublisherById(int id) => _context.Publishers.FirstOrDefault(n => n.Id == id);
 
